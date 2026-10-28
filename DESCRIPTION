@@ -1,0 +1,22 @@
+Package: RidgeLRGLH
+Type: Package
+Title: Ridge-Regularized Largest Root Tests for General Linear
+        Hypotheses
+Version: 0.1.0
+Authors@R: person("Haoran", "Li", email = "hzl0152@auburn.edu", role = c("aut", "cre"))
+Description: Tests general linear hypotheses in high-dimensional multivariate
+    regression using a ridge-regularized largest root statistic. Estimates the
+    population spectral distribution by linear programming and computes
+    Tracy-Widom centering and scaling constants. Supports fixed, Bayesian, and
+    minimax regularization choices. Implements the methods of Li (2025)
+    <doi:10.48550/arXiv.2504.15510>.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: lpSolve, RMTstat, stats
+NeedsCompilation: no
+Packaged: 2026-10-18 02:07:20 UTC; haoranli
+Author: Haoran Li [aut, cre]
+Maintainer: Haoran Li <hzl0152@auburn.edu>
+Repository: CRAN
+Date/Publication: 2026-10-28 10:30:27 UTC

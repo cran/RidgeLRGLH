@@ -1,0 +1,90 @@
+\documentclass{article}
+%\VignetteIndexEntry{RidgeLRGLH: Testing General Linear Hypotheses}
+%\VignetteEngine{utils::Sweave}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\title{RidgeLRGLH: Testing General Linear Hypotheses}
+\author{Haoran Li}
+\date{}
+\begin{document}
+\maketitle
+\section{Model and hypothesis}
+The package tests $BC=0$ in the multivariate model $Y=BX+E$.
+Responses form a $p\times n$ matrix, the design is $m\times n$, and
+contrasts form an $m\times q$ matrix. The design and contrast matrices must
+have full row and column rank, respectively. Include an intercept as a row
+of the design when appropriate. Residual and tested degrees of freedom
+are $n_2=n-m$ and $n_1=q$.
+
+The test uses the largest eigenvalue of
+$W_1(W_2+\lambda I_p)^{-1}$, where both Wishart matrices are normalized by
+their respective degrees of freedom. Under the conditions in Li (2025),
+$p^{2/3}(\ell_{\max}-\Theta_1)/\Theta_2$ has an asymptotic real Tracy--Widom
+distribution. This approximation may be inaccurate for small dimensions,
+small tested rank, irregular spectral edges or violations of the model.
+
+\section{An example}
+Here the first row of the design is an intercept and the hypothesis jointly
+tests the remaining ten predictors. Simulated data are generated under
+the null.
+<<example>>=
+library(RidgeLRGLH)
+set.seed(8)
+Y <- matrix(rnorm(20 * 80), 20)
+X <- rbind(1, matrix(rnorm(10 * 80), 10))
+C <- diag(11)[, -1, drop = FALSE]
+fit <- ridge_glht(Y, X, C, selection = "minimax",
+                 control = list(size = 60, grid_size = 80))
+fit
+head(fit$tuning)
+@
+For production use, the default spectral grid has 500 masses and 500
+transform points. The smaller grids above keep this example fast.
+
+\section{Regularization}
+A fixed ridge can be supplied as \texttt{lambda}. Its default is the mean
+residual eigenvalue. Adaptive choices use a finite candidate grid:
+\texttt{bayes\_identity}, \texttt{bayes\_covariance}, or \texttt{minimax}.
+The default candidates range from
+$\min(0.1p/n_2,1)\operatorname{tr}(W_2)/p$ to
+$5\operatorname{tr}(W_2)/p$ at ten equally spaced points.
+Minimax optimizes the worst signal-to-noise ratio over nonnegative
+mixtures of identity and covariance priors normalized to equal total
+signal strength. Adaptive calibration requires the consistency and
+separation conditions of Section 4 of the article. It does not give an
+exact finite-sample guarantee or adjust for testing multiple hypotheses.
+
+\section{Estimation and diagnostics}
+Algorithm 1 estimates a population spectral distribution by linear
+programming, matching the real and imaginary relative discrepancies of
+$Q_1$ and $Q_2$. Default grid selection and weight truncation follow
+Supplement S.2. The scalar parameterization of Section 3 yields the edge
+and derivatives by bracketed root finding and implicit differentiation,
+without requiring a dense ODE trajectory. Only \texttt{lpSolve} and
+\texttt{RMTstat} are required beyond standard R packages.
+<<diagnostics>>=
+fit$spectrum$loss
+sum(fit$spectrum$weights)
+fit$calibration
+@
+Inspect sensitivity to spectral grid size, fitting ridge and constraint
+order. The loss is an approximation diagnostic before weight truncation;
+it has no universal significance threshold. A user-supplied population
+spectrum can be used for oracle studies:
+<<oracle>>=
+ridge_glht(Y, X, C, lambda = 1,
+           spectrum = list(sigma = 1, weights = 1))
+@
+\section{Precomputed matrices}
+Use \texttt{ridge\_root(W1, W2, n1, n2)} for a common-covariance double
+Wishart problem. Both matrices must be positive semidefinite and normalized
+by their respective degrees of freedom. The denominator may be singular,
+but must have positive trace. This interface does not turn arbitrary
+sample covariance pairs into an equality-of-covariance test.
+
+\section{Reference}
+Li, H. (2025). Ridge-Regularized Largest Root Test For High-Dimensional
+General Linear Hypotheses. Accepted by the Annals of Statistics.
+\url{https://arxiv.org/abs/2504.15510}.
+\end{document}

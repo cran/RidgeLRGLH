@@ -1,0 +1,5 @@
+bibentry(bibtype = "Article",
+  title = "Ridge-Regularized Largest Root Test For High-Dimensional General Linear Hypotheses",
+  author = person("Haoran", "Li"), year = "2025",
+  journal = "arXiv preprint", doi = "10.48550/arXiv.2504.15510",
+  note = "Accepted by the Annals of Statistics; update with final publication details when available")
